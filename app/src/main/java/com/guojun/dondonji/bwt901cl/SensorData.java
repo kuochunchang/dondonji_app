@@ -1,4 +1,4 @@
-package com.example.guojun.dondonji.bwt901cl;
+package com.guojun.dondonji.bwt901cl;
 
 public class SensorData {
     String date;

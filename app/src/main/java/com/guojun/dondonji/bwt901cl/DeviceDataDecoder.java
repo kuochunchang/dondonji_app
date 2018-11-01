@@ -1,4 +1,4 @@
-package com.example.guojun.dondonji.bwt901cl;
+package com.guojun.dondonji.bwt901cl;
 
 import android.util.Log;
 
@@ -11,7 +11,7 @@ public class DeviceDataDecoder {
     private DecodedDataListener decodedDataListener;
 
     public interface DecodedDataListener {
-        void onDataDecoded(com.example.guojun.dondonji.bwt901cl.SensorData data);
+        void onDataDecoded(SensorData data);
     }
 
     public DeviceDataDecoder(DecodedDataListener listener){
@@ -20,7 +20,7 @@ public class DeviceDataDecoder {
 
 
 
-    com.example.guojun.dondonji.bwt901cl.SensorData data =  new com.example.guojun.dondonji.bwt901cl.SensorData();
+    SensorData data =  new SensorData();
     public void putRawData(byte[] raw, int length){
         for (int i = 0; i < length; i++) queueBuffer.add(raw[i]);
         while (queueBuffer.size() >= 11) {

@@ -21,7 +21,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.example.guojun.dondonji_app.R;
 import com.guojun.dondonji.db.AppDatabase;
 import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.Configuration;

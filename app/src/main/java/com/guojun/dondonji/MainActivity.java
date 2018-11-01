@@ -13,6 +13,8 @@ import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -21,22 +23,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
-import com.example.guojun.dondonji.bwt901cl.DeviceDataDecoder;
-import com.example.guojun.dondonji.bwt901cl.SensorData;
-import com.example.guojun.dondonji_app.R;
+import com.guojun.dondonji.bwt901cl.DeviceDataDecoder;
+import com.guojun.dondonji.bwt901cl.SensorData;
 import com.guojun.dondonji.db.AppDatabase;
 import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.Configuration;
+import com.guojun.dondonji.ui.bluetoothdevicediscovery.BluetoothDeviceDiscoveryFragment;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     private AppDatabase mAppDatabase;
     private BluetoothService mBluetoothService;
     private DeviceDataDecoder mDeviceDataDecoder;
     private BluetoothServiceConnection mBluetoothServiceConnection;
     private String mCurrentDeviceAddress;
-
+    private LegsMotionFragment mMotionFragment;
     private static final String TAG = "MainActivity";
     private boolean mThisDeviceSupportBluetooth = false;
     private boolean mIsBluetoothEnabled = false;
@@ -112,31 +114,41 @@ public class MainActivity extends AppCompatActivity{
                     startActivity(intent);
                 }
             });
-
-        } else {
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.hide();
-
-            String deviceAddress = addressConfigurationEntity.getValue();
-            mCurrentDeviceAddress = deviceAddress;
-            deviceName.setText(String.format("%s (%s)", nameConfigurationEntity.getValue(), mCurrentDeviceAddress));
-            mBluetoothServiceConnection = new BluetoothServiceConnection();
-            bindService(
-                    new Intent(this, BluetoothService.class), mBluetoothServiceConnection
-                    , Context.BIND_AUTO_CREATE);
-
-            mDeviceDataDecoder = new DeviceDataDecoder(new DeviceDataDecoder.DecodedDataListener() {
-                TextView mmTextView;
-
-                @Override
-                public void onDataDecoded(SensorData data) {
-                    if (mmTextView == null) {
-                        mmTextView = findViewById(R.id.device_data_text);
-                    }
-                    mmTextView.setText(data.toString());
-                }
-            });
+            return;
         }
+
+
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.hide();
+
+        String deviceAddress = addressConfigurationEntity.getValue();
+        mCurrentDeviceAddress = deviceAddress;
+        deviceName.setText(String.format("%s (%s)", nameConfigurationEntity.getValue(), mCurrentDeviceAddress));
+        mBluetoothServiceConnection = new BluetoothServiceConnection();
+        bindService(
+                new Intent(this, BluetoothService.class), mBluetoothServiceConnection
+                , Context.BIND_AUTO_CREATE);
+
+        mDeviceDataDecoder = new DeviceDataDecoder(new DeviceDataDecoder.DecodedDataListener() {
+//            TextView mmTextView;
+
+            @Override
+            public void onDataDecoded(SensorData data) {
+//                if (mmTextView == null) {
+//                    mmTextView = findViewById(R.id.device_data_text);
+//                }
+//                mmTextView.setText(data.toString());
+                if(mMotionFragment != null) {
+                    mMotionFragment.setSensorData(data);
+                }
+            }
+        });
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        mMotionFragment = LegsMotionFragment.newInstance();
+        fragmentTransaction.add(R.id.device_data_container, mMotionFragment);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -166,6 +178,8 @@ public class MainActivity extends AppCompatActivity{
         }
         super.onDestroy();
     }
+
+
 
     //--------------------------------------------------
     private class BluetoothServiceConnection implements ServiceConnection {

@@ -23,7 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.guojun.dondonji.MainActivity;
-import com.example.guojun.dondonji_app.R;
+import com.guojun.dondonji.R;
 import com.guojun.dondonji.db.AppDatabase;
 import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.BluetoothDeviceInfo;

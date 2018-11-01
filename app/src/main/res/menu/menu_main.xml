@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.guojun.dondonji_app.com.guojun.dondonji.MainActivity">
+    tools:context="com.guojun.dondonji.com.guojun.dondonji.MainActivity">
     <item
         android:id="@+id/bluetooth_device_settings"
         android:orderInCategory="100"
