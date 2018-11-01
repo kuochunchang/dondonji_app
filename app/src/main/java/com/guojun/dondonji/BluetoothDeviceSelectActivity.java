@@ -50,8 +50,8 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity {
             public void onClick(View view) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                BluetoothDeviceDiscoveryFragment fragment = BluetoothDeviceDiscoveryFragment.newInstance();
-                fragmentTransaction.add(R.id.discovered_device_fragment_container, fragment);
+                BluetoothDeviceDiscoveryFragment mBluetoothDeviceDiscoveryFragment = BluetoothDeviceDiscoveryFragment.newInstance();
+                fragmentTransaction.add(R.id.discovered_device_fragment_container, mBluetoothDeviceDiscoveryFragment);
                 fragmentTransaction.commit();
                 fab.hide();
             }

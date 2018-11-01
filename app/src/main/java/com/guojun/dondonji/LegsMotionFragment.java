@@ -20,9 +20,14 @@ import com.guojun.dondonji.bwt901cl.SensorData;
 public class LegsMotionFragment extends Fragment {
 
     private LegsMotionViewModel mViewModel;
-    private boolean isStart = false;
-    private Integer initialAngle = null;
-    MotionDecoder lMotionDecoder = new MotionDecoder();
+    private boolean isStarted = false;
+    private TextView mLeftCounterTextView;
+    private TextView mRightCounterTextView;
+    private ProgressBar mLeftProgressBar;
+    private ProgressBar mRightProgressBar;
+
+    private ExerciseAdapter mLeftExerciseAdapter = new ExerciseAdapter();
+    private ExerciseAdapter mRightExerciseAdapter = new ExerciseAdapter();
 
     public static LegsMotionFragment newInstance() {
         return new LegsMotionFragment();
@@ -39,57 +44,52 @@ public class LegsMotionFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        Button buttonStart = getView().findViewById(R.id.buttonStart);
+        mLeftCounterTextView = getView().findViewById(R.id.leftCounter);
+        mRightCounterTextView = getView().findViewById(R.id.rightCounter);
+
+        mLeftProgressBar = getView().findViewById(R.id.leftProgressBar);
+        mRightProgressBar = getView().findViewById(R.id.rightProgressBar);
+
+        final Button buttonStart = getView().findViewById(R.id.buttonStart);
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isStart = true;
+                if(!isStarted) {
+                    isStarted = true;
+                    buttonStart.setText("Stop");
+                }else{
+                    isStarted = false;
+                    buttonStart.setText("Starts");
+                }
             }
         });
 
         mViewModel = ViewModelProviders.of(this).get(LegsMotionViewModel.class);
-        mViewModel.getProgress().observe(this, new Observer<int[]>() {
+        mViewModel.getMotionStatus().observe(this, new Observer<LegsMotionViewModel.MotionStatus>() {
             @Override
-            public void onChanged(@Nullable int[] progress) {
+            public void onChanged(@Nullable LegsMotionViewModel.MotionStatus status) {
 
-                if(! isStart){
+                if(!isStarted){
                     return;
                 }
 
-                if(initialAngle == null){
-                    initialAngle = progress[0];
-                    lMotionDecoder.setInitAngle(initialAngle);
-                }
-
-                TextView leftCounterTextView = getView().findViewById(R.id.leftCounterA);
-                TextView rightCounterTextView = getView().findViewById(R.id.rightCounter);
-                Log.d("666", ""+progress[0]);
-//                leftCounterTextView.setText(String.valueOf(doubles[0]));
-
-                ProgressBar pbl = getView().findViewById(R.id.leftProgressBar);
-                ProgressBar pbr = getView().findViewById(R.id.rightProgressBar);
-
-
-
-                MotionDecoder.StatePack state = lMotionDecoder.putAngle(progress[0]);
-
-
-
-                pbl.setMax(lMotionDecoder.getTarget_angle());
-                pbr.setMax(lMotionDecoder.getTarget_angle());
-
-                pbl.setProgress(state.getProgress().intValue());
-                leftCounterTextView.setText(String.valueOf(state.getCount()));
-
-//                rightCounterTextView.setText(state.getStatus().toString());
+                mLeftProgressBar.setProgress(status.getStepProgressLeft());
+                mLeftCounterTextView.setText(Integer.valueOf(status.getCounterLeft()).toString());
+;
             }
         });
     }
 
 
-    public void setSensorData(SensorData sensorData) {
-        Log.d("666",sensorData.getAngleX()+"");
-        mViewModel.setLeftProgress(Double.valueOf(sensorData.getAngleX()).intValue());
+    public void setLeftSensorData(SensorData sensorData) {
+        ExerciseAdapter.MotionInfo mo = mLeftExerciseAdapter.putAngle(sensorData.getAngleX());
+        mViewModel.updateLeftStatus(mo.getCount(), mo.getProgress());
+
+    }
+
+    public void setRightSensorData(SensorData sensorData) {
+        ExerciseAdapter.MotionInfo mo = mRightExerciseAdapter.putAngle(sensorData.getAngleX());
+        mViewModel.updateRightStatus(mo.getCount(), mo.getProgress());
 
     }
 }

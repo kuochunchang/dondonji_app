@@ -28,7 +28,6 @@ import com.guojun.dondonji.bwt901cl.SensorData;
 import com.guojun.dondonji.db.AppDatabase;
 import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.Configuration;
-import com.guojun.dondonji.ui.bluetoothdevicediscovery.BluetoothDeviceDiscoveryFragment;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -134,21 +133,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onDataDecoded(SensorData data) {
-//                if (mmTextView == null) {
-//                    mmTextView = findViewById(R.id.device_data_text);
-//                }
-//                mmTextView.setText(data.toString());
-                if(mMotionFragment != null) {
-                    mMotionFragment.setSensorData(data);
+
+                if (mMotionFragment != null) {
+                    mMotionFragment.setLeftSensorData(data);
                 }
             }
         });
 
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        mMotionFragment = LegsMotionFragment.newInstance();
-        fragmentTransaction.add(R.id.device_data_container, mMotionFragment);
-        fragmentTransaction.commit();
+        if (mMotionFragment == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            mMotionFragment = LegsMotionFragment.newInstance();
+            fragmentTransaction.add(R.id.device_data_container, mMotionFragment);
+            fragmentTransaction.commit();
+        }
     }
 
     @Override
@@ -178,7 +177,6 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onDestroy();
     }
-
 
 
     //--------------------------------------------------
