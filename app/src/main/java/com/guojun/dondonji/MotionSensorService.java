@@ -18,8 +18,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BluetoothService {
-    private static final String TAG = "BluetoothService";
+public class MotionSensorService {
+    private static final String TAG = "MotionSensorService";
     private static final UUID MY_UUID = UUID.fromString("0001101-0000-1000-8000-00805F9B34FB");
     private Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -28,7 +28,7 @@ public class BluetoothService {
     private DeviceDataDecoder mDeviceDataDecoder;
 
 
-    public BluetoothService(Handler handler) {
+    public MotionSensorService(Handler handler) {
         this.mHandler = handler;
         mDeviceDataDecoder = new DeviceDataDecoder(new DeviceDataDecoder.DecodedDataListener() {
             @Override
