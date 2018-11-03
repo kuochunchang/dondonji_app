@@ -3,13 +3,10 @@ package com.guojun.dondonji;
 import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.bluetooth.BluetoothAdapter;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -30,13 +27,13 @@ import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.Configuration;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements BluetoothActionHandler {
 
     private AppDatabase mAppDatabase;
-    private BluetoothService mBluetoothService;
-    private DeviceDataDecoder mDeviceDataDecoder;
-    private BluetoothServiceConnection mBluetoothServiceConnection;
-    private String mCurrentDeviceAddress;
+    private BluetoothService mLeftBluetoothService;
+    private BluetoothService mRightBluetoothService;
+    private String mLeftDeviceAddress;
+    private String mRightDeviceAddress;
     private LegsMotionFragment mMotionFragment;
     private static final String TAG = "MainActivity";
     private boolean mThisDeviceSupportBluetooth = false;
@@ -121,24 +118,37 @@ public class MainActivity extends AppCompatActivity {
         fab.hide();
 
         String deviceAddress = addressConfigurationEntity.getValue();
-        mCurrentDeviceAddress = deviceAddress;
-        deviceName.setText(String.format("%s (%s)", nameConfigurationEntity.getValue(), mCurrentDeviceAddress));
-        mBluetoothServiceConnection = new BluetoothServiceConnection();
-        bindService(
-                new Intent(this, BluetoothService.class), mBluetoothServiceConnection
-                , Context.BIND_AUTO_CREATE);
-
-        mDeviceDataDecoder = new DeviceDataDecoder(new DeviceDataDecoder.DecodedDataListener() {
-//            TextView mmTextView;
-
+        mLeftDeviceAddress = deviceAddress;
+        deviceName.setText(String.format("%s (%s)", nameConfigurationEntity.getValue(), mLeftDeviceAddress));
+        mLeftBluetoothService = new BluetoothService(new Handler(){
             @Override
-            public void onDataDecoded(SensorData data) {
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                TextView textView = findViewById(R.id.bluetooth_device_status);
 
-                if (mMotionFragment != null) {
-                    mMotionFragment.setLeftSensorData(data);
+                switch (msg.what) {
+                    case BluetoothService.Constants.MESSAGE_READ:
+                        SensorData data = (SensorData) msg.obj;
+                        try {
+                            mMotionFragment.setLeftSensorData(data);
+                        } catch (Exception e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+                        break;
+                    case BluetoothService.Constants.MESSAGE_CONNECTED:
+                        textView.setText("Connected");
+                        textView.setTextColor(getResources().getColor(R.color.colorConnected));
+                        break;
+                    case BluetoothService.Constants.MESSAGE_CONN_FAIL:
+                        textView.setText("Fail to connect");
+                        textView.setTextColor(getResources().getColor(R.color.colorAccent));
+
+                        break;
                 }
             }
         });
+        mLeftBluetoothService.connect(mLeftDeviceAddress);
+
 
         if (mMotionFragment == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
@@ -172,61 +182,32 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         if (mThisDeviceSupportBluetooth) {
-            mBluetoothService.disconnect();
+            mLeftBluetoothService.disconnect();
             Log.d(TAG, "releaseService(): unbound.");
         }
         super.onDestroy();
     }
 
-
-    //--------------------------------------------------
-    private class BluetoothServiceConnection implements ServiceConnection {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            TextView textView = findViewById(R.id.bluetooth_device_status);
-
-            if (mBluetoothService == null) {
-                textView.setText("Connecting...");
-                mBluetoothService = ((BluetoothService.LocalBinder) service).getService(new IncomingMessageHandler());
-                mBluetoothService.connect(mCurrentDeviceAddress);
-            }
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-        }
+    @Override
+    public void onConnected() {
+//        TextView textView = MainActivity.this.findViewById(R.id.bluetooth_device_status);
+//        textView.setText("Connected");
+//        textView.setTextColor(getResources().getColor(R.color.colorConnected));
     }
 
+    @Override
+    public void onConnectFail() {
+//        TextView textView = MainActivity.this.findViewById(R.id.bluetooth_device_status);
+//        textView.setText("Fail to connect");
+//        textView.setTextColor(getResources().getColor(R.color.colorAccent));
 
-    class IncomingMessageHandler extends Handler {
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            TextView textView = findViewById(R.id.bluetooth_device_status);
-
-            switch (msg.what) {
-                case BluetoothService.Constants.MESSAGE_READ:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    int length = msg.arg1;
-                    try {
-                        mDeviceDataDecoder.putRawData(readBuf, length);
-                    } catch (Exception e) {
-                        Log.e(TAG, e.getMessage());
-                    }
-                    break;
-                case BluetoothService.Constants.MESSAGE_CONNECTED:
-                    textView.setText("Connected");
-                    textView.setTextColor(getResources().getColor(R.color.colorConnected));
-                    break;
-                case BluetoothService.Constants.MESSAGE_CONN_FAIL:
-                    textView.setText("Fail to connect");
-                    textView.setTextColor(getResources().getColor(R.color.colorAccent));
-
-                    break;
-            }
-        }
     }
 
+    @Override
+    public void onDataReceived(SensorData data) {
+//        if (mMotionFragment != null) {
+//            mMotionFragment.setLeftSensorData(data);
+//        }
+        Log.d("----", data.toString());
+    }
 }
