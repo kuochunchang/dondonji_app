@@ -25,11 +25,6 @@
         </activity>
         <activity android:name="com.guojun.dondonji.BluetoothDeviceSelectActivity" />
 
-        <service
-            android:name="com.guojun.dondonji.BluetoothService"
-            android:enabled="true"
-            android:exported="true" />
-
     </application>
 
 </manifest>

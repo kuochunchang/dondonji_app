@@ -10,20 +10,34 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
+import com.guojun.dondonji.bwt901cl.DeviceDataDecoder;
+import com.guojun.dondonji.bwt901cl.SensorData;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
-public class BluetoothService extends Service {
-    private static final String TAG = "BluetoothService";
+public class MotionSensorService {
+    private static final String TAG = "MotionSensorService";
     private static final UUID MY_UUID = UUID.fromString("0001101-0000-1000-8000-00805F9B34FB");
     private Handler mHandler;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
+    private DeviceDataDecoder mDeviceDataDecoder;
 
-    public BluetoothService() {
+
+    public MotionSensorService(Handler handler) {
+        this.mHandler = handler;
+        mDeviceDataDecoder = new DeviceDataDecoder(new DeviceDataDecoder.DecodedDataListener() {
+            @Override
+            public void onDataDecoded(SensorData data) {
+
+                mHandler.obtainMessage(Constants.MESSAGE_READ, data)
+                        .sendToTarget();
+            }
+        });
     }
 
     public interface Constants {
@@ -42,19 +56,6 @@ public class BluetoothService extends Service {
 
     }
 
-    private Binder mBinder = new LocalBinder();
-
-    class LocalBinder extends Binder {
-        public BluetoothService getService(Handler handler) {
-            mHandler = handler;
-            return BluetoothService.this;
-        }
-    }
-
-    @Override
-    public IBinder onBind(Intent arg0) {
-        return mBinder;
-    }
 
     private class ConnectThread extends Thread {
         private final BluetoothSocket mmSocket;
@@ -104,8 +105,6 @@ public class BluetoothService extends Service {
             }
             mConnectedThread = new ConnectedThread(mmSocket);
             mConnectedThread.start();
-
-
         }
 
         public void cancel() {
@@ -152,13 +151,9 @@ public class BluetoothService extends Service {
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
-                    // Read from the InputStream
                     bytes = mmInStream.read(buffer);
                     Log.d(TAG, "message bytes " + bytes);
-//                    Log.d(TAG, "message buffer " + new String(buffer));
-
-                    mHandler.obtainMessage(Constants.MESSAGE_READ, bytes, -1, buffer)
-                            .sendToTarget();
+                    mDeviceDataDecoder.putRawData(buffer, bytes);
 
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
@@ -171,10 +166,6 @@ public class BluetoothService extends Service {
         public void write(byte[] buffer) {
             try {
                 mmOutStream.write(buffer);
-
-                // Share the sent message back to the UI Activity
-//                mHandler.obtainMessage(MESSAGE_WRITE, -1, -1, buffer)
-//                        .sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
