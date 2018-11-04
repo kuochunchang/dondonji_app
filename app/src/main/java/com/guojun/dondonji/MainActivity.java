@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,7 +26,7 @@ import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.Configuration;
 
 
-public class MainActivity extends AppCompatActivity implements BluetoothActionHandler {
+public class MainActivity extends AppCompatActivity {
 
     private AppDatabase mAppDatabase;
     private MotionSensorService mLeftMotionSensorService;
@@ -33,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements BluetoothActionHa
     private String mLeftMotionSensorAddress;
     private String mRightMotionSensorAddress;
     private LegsMotionFragment mMotionFragment;
+    private SensorStateFragment mSensorFragment;
     private static final String TAG = "MainActivity";
     private boolean mThisDeviceSupportBluetooth = false;
     private boolean mIsBluetoothEnabled = false;
@@ -156,6 +158,15 @@ public class MainActivity extends AppCompatActivity implements BluetoothActionHa
             fragmentTransaction.add(R.id.device_data_container, mMotionFragment);
             fragmentTransaction.commit();
         }
+
+        if (mSensorFragment == null) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            mSensorFragment = SensorStateFragment.newInstance();
+            fragmentTransaction.add(R.id.device_status_container, mSensorFragment);
+            fragmentTransaction.commit();
+        }
     }
 
     @Override
@@ -186,26 +197,4 @@ public class MainActivity extends AppCompatActivity implements BluetoothActionHa
         super.onDestroy();
     }
 
-    @Override
-    public void onConnected() {
-//        TextView textView = MainActivity.this.findViewById(R.id.bluetooth_device_status);
-//        textView.setText("Connected");
-//        textView.setTextColor(getResources().getColor(R.color.colorConnected));
-    }
-
-    @Override
-    public void onConnectFail() {
-//        TextView textView = MainActivity.this.findViewById(R.id.bluetooth_device_status);
-//        textView.setText("Fail to connect");
-//        textView.setTextColor(getResources().getColor(R.color.colorAccent));
-
-    }
-
-    @Override
-    public void onDataReceived(SensorData data) {
-//        if (mMotionFragment != null) {
-//            mMotionFragment.setLeftSensorData(data);
-//        }
-        Log.d("----", data.toString());
-    }
 }

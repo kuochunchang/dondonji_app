@@ -28,8 +28,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:orientation="horizontal"
-            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="10dp">
 
 
@@ -46,9 +46,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="L"
-                    android:textStyle="bold"
                     android:textAlignment="center"
-                    android:textSize="120dp" />
+                    android:textSize="100dp"
+                    android:textStyle="bold" />
 
                 <ProgressBar
                     android:id="@+id/leftProgressBar"
@@ -77,9 +77,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="R"
-                    android:textStyle="bold"
                     android:textAlignment="center"
-                    android:textSize="120dp" />
+                    android:textSize="100dp"
+                    android:textStyle="bold" />
 
                 <ProgressBar
                     android:id="@+id/rightProgressBar"
@@ -106,7 +106,7 @@
                 android:id="@+id/buttonStart"
                 android:layout_width="match_parent"
                 android:layout_height="140dp"
-
+                android:background="@color/design_default_color_primary"
                 android:text="Start" />
 
         </LinearLayout>
