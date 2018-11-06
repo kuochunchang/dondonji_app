@@ -94,9 +94,7 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity implements 
                 asyncTask = new InsertDbTask();
                 asyncTask.execute(configurationEntity);
 
-                Intent intent =
-                        new Intent(BluetoothDeviceSelectActivity.this, MainActivity.class);
-                startActivity(intent);
+                finish();
             }
         });
     }
@@ -114,6 +112,7 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity implements 
             for (ConfigurationEntity entity : entities) {
                 appDatabase.configurationDao().update(entity);
             }
+
             return null;
         }
     }
@@ -133,6 +132,7 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity implements 
 
             asyncTask = new InsertDbTask();
             asyncTask.execute(configurationEntity);
+
         }
     }
 

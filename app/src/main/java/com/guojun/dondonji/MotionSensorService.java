@@ -43,7 +43,7 @@ public class MotionSensorService {
     public interface Constants {
 
         int MESSAGE_CONNECTED = 0;
-        int MESSAGE_STATE_CHANGE = 1;
+        int MESSAGE_CONNECTING = 1;
         int MESSAGE_READ = 2;
         int MESSAGE_WRITE = 3;
         int MESSAGE_DEVICE_NAME = 4;
@@ -76,7 +76,8 @@ public class MotionSensorService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectThread");
             setName("ConnectThread");
-
+            mHandler.obtainMessage(Constants.MESSAGE_CONNECTING)
+                    .sendToTarget();
             // Always cancel discovery because it will slow down a connection
             mBluetoothAdapter.cancelDiscovery();
 

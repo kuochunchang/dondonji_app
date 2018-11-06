@@ -98,9 +98,10 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
 
                 mListener.onUserSelectedDevice(name, address, mDeviceSide);
 
-                Intent intent =
-                        new Intent(getActivity(), MainActivity.class);
-                startActivity(intent);
+//                Intent intent =
+//                        new Intent(getActivity(), MainActivity.class);
+//                startActivity(intent);
+                getActivity().finish();
             }
         });
 

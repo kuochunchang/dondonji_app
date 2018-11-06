@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.arch.persistence.room.Room;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -18,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 
 import com.guojun.dondonji.bwt901cl.SensorData;
 import com.guojun.dondonji.db.AppDatabase;
@@ -34,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     private String mLeftMotionSensorAddress;
     private String mRightMotionSensorAddress;
     private LegsMotionFragment mMotionFragment;
-    private SensorStateFragment mSensorFragment;
+    private SensorManagementFragment mSensorFragment;
     private static final String TAG = "MainActivity";
     private boolean mThisDeviceSupportBluetooth = false;
     private boolean mIsBluetoothEnabled = false;
@@ -47,13 +45,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//        TextView deviceName = findViewById(R.id.bluetooth_device_name);
-
-        // Check if the device has bluetooth adapter
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             mThisDeviceSupportBluetooth = false;
-//            deviceName.setText("This device not support bluetooth.");
             return;
         } else {
             mThisDeviceSupportBluetooth = true;
@@ -91,8 +85,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-//        TextView deviceName = findViewById(R.id.bluetooth_device_name);
-
         mAppDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app-db").allowMainThreadQueries().build();
         ConfigurationEntity leftAddressConfigurationEntity =
                 mAppDatabase.configurationDao().getConfiguration(Configuration.LEFT_BLUETOOTH_DEVICE_ADDRESS);
@@ -117,41 +109,36 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.hide();
 
-        String deviceAddress = leftAddressConfigurationEntity.getValue();
-        mLeftMotionSensorAddress = deviceAddress;
-//        deviceName.setText(String.format("%s (%s)", leftNameConfigurationEntity.getValue(), mLeftMotionSensorAddress));
-        mLeftMotionSensorService = new MotionSensorService(new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
+        if(mLeftMotionSensorService == null) {
+            mLeftMotionSensorService = new MotionSensorService(new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    super.handleMessage(msg);
 //                TextView textView = findViewById(R.id.bluetooth_device_status);
 
-                switch (msg.what) {
-                    case MotionSensorService.Constants.MESSAGE_READ:
-                        SensorData data = (SensorData) msg.obj;
-                        try {
-                            mMotionFragment.setLeftSensorData(data);
-                        } catch (Exception e) {
-                            Log.e(TAG, e.getMessage());
-                        }
-                        break;
-                    case MotionSensorService.Constants.MESSAGE_CONNECTED:
-//                        textView.setText("Connected");
-                        mSensorFragment.setLeftSensorConnection(true);
-//                        textView.setTextColor(getResources().getColor(R.color.colorConnected));
-                        break;
-                    case MotionSensorService.Constants.MESSAGE_CONN_FAIL:
-//                        textView.setText("Fail to connect");
-                        mSensorFragment.setLeftSensorConnection(false);
-//                        textView.setTextColor(getResources().getColor(R.color.colorAccent));
+                    switch (msg.what) {
+                        case MotionSensorService.Constants.MESSAGE_READ:
+                            SensorData data = (SensorData) msg.obj;
+                            try {
+                                mMotionFragment.setLeftSensorData(data);
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage());
+                            }
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONNECTING:
+                            mSensorFragment.setLeftSensorStatus(SensorManagementFragment.SensorStatus.CONNECTING);
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONNECTED:
+                            mSensorFragment.setLeftSensorStatus(SensorManagementFragment.SensorStatus.CONNECTED);
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONN_FAIL:
+                            mSensorFragment.setLeftSensorStatus(SensorManagementFragment.SensorStatus.CONNECT_FAIL);
 
-                        break;
+                            break;
+                    }
                 }
-            }
-        });
-        mLeftMotionSensorService.connect(mLeftMotionSensorAddress);
-
-
+            });
+        }
         if (mMotionFragment == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -165,12 +152,16 @@ public class MainActivity extends AppCompatActivity {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-            mSensorFragment = SensorStateFragment.newInstance();
+            mSensorFragment = SensorManagementFragment.newInstance();
             fragmentTransaction.add(R.id.device_status_container, mSensorFragment);
             fragmentTransaction.commit();
         }
 
-//        mSensorFragment.set
+        String deviceAddress = leftAddressConfigurationEntity.getValue();
+        mLeftMotionSensorAddress = deviceAddress;
+        mLeftMotionSensorService.connect(mLeftMotionSensorAddress);
+
+
     }
 
     @Override
@@ -184,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.bluetooth_device_settings) {
+            mLeftMotionSensorService.disconnect();
             Intent intent = new Intent(this, BluetoothDeviceSelectActivity.class);
             startActivity(intent);
             return true;
