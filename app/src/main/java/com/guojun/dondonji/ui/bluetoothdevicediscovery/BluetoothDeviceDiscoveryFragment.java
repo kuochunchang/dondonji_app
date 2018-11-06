@@ -22,8 +22,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.guojun.dondonji.BlankFragment;
 import com.guojun.dondonji.MainActivity;
 import com.guojun.dondonji.R;
+import com.guojun.dondonji.SensorSide;
 import com.guojun.dondonji.db.AppDatabase;
 import com.guojun.dondonji.db.ConfigurationEntity;
 import com.guojun.dondonji.model.BluetoothDeviceInfo;
@@ -36,9 +38,16 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
     private BluetoothDeviceDiscoveryViewModel mViewModel;
     private ListView mDeviceListView;
     private BluetoothAdapter mBluetoothAdapter;
+    private DeviceDiscoveryListener mListener;
     private static final String TAG = "DeviceDiscoveryFragment";
+    public static final String ARG_DEVICE_SIDE = "side";
+    private SensorSide mDeviceSide;
 
-    public static BluetoothDeviceDiscoveryFragment newInstance() {
+    public static BluetoothDeviceDiscoveryFragment newInstance(SensorSide side) {
+        BlankFragment fragment = new BlankFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_DEVICE_SIDE, side.toString());
+        fragment.setArguments(args);
         return new BluetoothDeviceDiscoveryFragment();
     }
 
@@ -53,6 +62,14 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
             }
         }
     };
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            mDeviceSide = SensorSide.valueOf(getArguments().getString(ARG_DEVICE_SIDE));
+        }
+    }
 
     @Nullable
     @Override
@@ -78,18 +95,8 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
 
                 String name = mViewModel.getAvailableDevicesLiveData().getValue().get(position).getName();
                 String address = mViewModel.getAvailableDevicesLiveData().getValue().get(position).getAddress();
-                ConfigurationEntity configurationEntity =
-                        new ConfigurationEntity(Configuration.BLUETOOTH_DEVICE_ADDRESS, address);
 
-                InsertDbTask asyncTask = new InsertDbTask();
-                asyncTask.execute(configurationEntity);
-
-                configurationEntity =
-                        new ConfigurationEntity(Configuration.BLUETOOTH_DEVICE_NAME, name);
-
-                asyncTask = new InsertDbTask();
-                asyncTask.execute(configurationEntity);
-
+                mListener.onUserSelectedDevice(name, address, mDeviceSide);
 
                 Intent intent =
                         new Intent(getActivity(), MainActivity.class);
@@ -124,14 +131,30 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
         });
 
 
+
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         mBluetoothAdapter.startDiscovery();
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DeviceDiscoveryListener) {
+            mListener = (DeviceDiscoveryListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement DeviceDiscoveryListener");
+        }
     }
 
     @Override
     public void onStop() {
         mBluetoothAdapter.cancelDiscovery();
         super.onStop();
+    }
+
+    public interface DeviceDiscoveryListener{
+        void onUserSelectedDevice(String name, String address, SensorSide side);
     }
 
     //-----------------------AsyncTasks-----------------------------------
@@ -146,4 +169,6 @@ public class BluetoothDeviceDiscoveryFragment extends Fragment {
             return null;
         }
     }
+
+
 }

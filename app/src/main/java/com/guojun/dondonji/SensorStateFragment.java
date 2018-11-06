@@ -1,6 +1,7 @@
 package com.guojun.dondonji;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -11,16 +12,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 
 public class SensorStateFragment extends Fragment {
-    private ImageView mImageLeftOffLine;
-    private ImageView mImageLeftOnLine;
     private Button mLeftButton;
+    private TextView mLeftText;
 
-    private ImageView mImageRightOffLine;
-    private ImageView mImageRightOnLine;
     private Button mRightButton;
+    private TextView mRightText;
 
 
     public SensorStateFragment() {
@@ -59,15 +59,13 @@ public class SensorStateFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mImageLeftOffLine = getActivity().findViewById(R.id.imageLeftOffLine);
-        mImageLeftOnLine = getActivity().findViewById(R.id.imageLeftOnLine);
-        mImageRightOffLine = getActivity().findViewById(R.id.imageRightOffLine);
-        mImageRightOnLine = getActivity().findViewById(R.id.imageRightOnLine);
         mLeftButton = getActivity().findViewById(R.id.buttonLeft);
         mRightButton = getActivity().findViewById(R.id.buttonRight);
+        mLeftText = getActivity().findViewById(R.id.textLeft);
+        mRightText = getActivity().findViewById(R.id.textRight);
 
-        setIsLeftSensorConnected(false);
-        setIsRightSensorConnected(false);
+//        setLeftSensorConnection(false);
+//        setRightSensorConnection(false);
     }
 
     @Override
@@ -82,27 +80,25 @@ public class SensorStateFragment extends Fragment {
         super.onDetach();
     }
 
-    private void setIsLeftSensorConnected(boolean connected) {
+    public void setLeftSensorConnection(boolean connected) {
         if(connected) {
-            mImageLeftOffLine.setVisibility(View.INVISIBLE);
-            mImageLeftOnLine.setVisibility(View.VISIBLE);
-            mLeftButton.setVisibility(View.INVISIBLE);
+            mLeftButton.setText("Setup");
+            mLeftText.setTextColor(getResources().getColor(R.color.colorConnected));
+            mLeftText.setText("Sensor Connected");
         }else{
-            mImageLeftOffLine.setVisibility(View.VISIBLE);
-            mImageLeftOnLine.setVisibility(View.INVISIBLE);
-            mLeftButton.setVisibility(View.VISIBLE);
+            mLeftButton.setText("Connect");
+            mLeftText.setText("Sensor Disconnect");
         }
     }
 
-    private void setIsRightSensorConnected(boolean connected) {
+    public void setRightSensorConnection(boolean connected) {
         if(connected) {
-            mImageRightOffLine.setVisibility(View.INVISIBLE);
-            mImageRightOnLine.setVisibility(View.VISIBLE);
-            mRightButton.setVisibility(View.INVISIBLE);
+            mRightButton.setText("Setup");
+            mLeftText.setTextColor(Color.GREEN);
+            mRightText.setText("Sensor Connected");
         }else{
-            mImageRightOffLine.setVisibility(View.VISIBLE);
-            mImageRightOnLine.setVisibility(View.INVISIBLE);
-            mRightButton.setVisibility(View.VISIBLE);
+            mRightButton.setText("Connect");
+            mRightText.setText("Sensor Disconnect");
         }
     }
 

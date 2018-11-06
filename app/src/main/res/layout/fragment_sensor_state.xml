@@ -19,67 +19,61 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:textAlignment="center">
 
-            <ImageView
-                android:id="@+id/imageLeftOffLine"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@android:drawable/presence_offline" />
-
-            <ImageView
-                android:id="@+id/imageLeftOnLine"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@android:drawable/presence_online" />
-
-            <TextView
-                android:id="@+id/textLeft"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="L" />
+                android:gravity="center"
+                android:orientation="vertical"
+                android:textAlignment="center">
 
-            <Button
-                android:id="@+id/buttonLeft"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Connect"
-                android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/textLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="Connecting..." />
+
+                <Button
+                    android:id="@+id/buttonLeft"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Connect"
+                    android:textSize="12sp" />
+            </LinearLayout>
         </LinearLayout>
-
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="0.5"
             android:gravity="center"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:textAlignment="center">
 
-
-            <ImageView
-                android:id="@+id/imageRightOffLine"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@android:drawable/presence_offline" />
-
-            <ImageView
-                android:id="@+id/imageRightOnLine"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:src="@android:drawable/presence_online" />
-
-            <TextView
-                android:id="@+id/textRight"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="R" />
+                android:gravity="center"
+                android:orientation="vertical"
+                android:textAlignment="center">
 
-            <Button
-                android:id="@+id/buttonRight"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:text="Connect"
-                android:textSize="12sp" />
+                <TextView
+                    android:id="@+id/textRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textStyle="bold"
+                    android:text="Connecting..." />
+
+                <Button
+                    android:id="@+id/buttonRight"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:text="Connect"
+                    android:textSize="12sp" />
+            </LinearLayout>
         </LinearLayout>
 
 

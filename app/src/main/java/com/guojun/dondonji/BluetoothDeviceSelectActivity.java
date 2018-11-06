@@ -33,7 +33,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.annotations.Nullable;
 
 
-public class BluetoothDeviceSelectActivity extends AppCompatActivity {
+public class BluetoothDeviceSelectActivity extends AppCompatActivity implements BluetoothDeviceDiscoveryFragment.DeviceDiscoveryListener {
 
     private AppDatabase appDatabase;
     private BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -50,7 +50,7 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity {
             public void onClick(View view) {
                 FragmentManager fragmentManager = getSupportFragmentManager();
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                BluetoothDeviceDiscoveryFragment mBluetoothDeviceDiscoveryFragment = BluetoothDeviceDiscoveryFragment.newInstance();
+                BluetoothDeviceDiscoveryFragment mBluetoothDeviceDiscoveryFragment = BluetoothDeviceDiscoveryFragment.newInstance(SensorSide.LEFT);
                 fragmentTransaction.add(R.id.discovered_device_fragment_container, mBluetoothDeviceDiscoveryFragment);
                 fragmentTransaction.commit();
                 fab.hide();
@@ -83,13 +83,13 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity {
 
                 BluetoothDevice selectedDevice = boundedDevices.get(position);
                 ConfigurationEntity configurationEntity =
-                        new ConfigurationEntity(Configuration.BLUETOOTH_DEVICE_ADDRESS, selectedDevice.getAddress());
+                        new ConfigurationEntity(Configuration.LEFT_BLUETOOTH_DEVICE_ADDRESS, selectedDevice.getAddress());
 
                 InsertDbTask asyncTask = new InsertDbTask();
                 asyncTask.execute(configurationEntity);
 
                 configurationEntity =
-                        new ConfigurationEntity(Configuration.BLUETOOTH_DEVICE_NAME, selectedDevice.getName());
+                        new ConfigurationEntity(Configuration.LEFT_BLUETOOTH_DEVICE_NAME, selectedDevice.getName());
 
                 asyncTask = new InsertDbTask();
                 asyncTask.execute(configurationEntity);
@@ -115,6 +115,24 @@ public class BluetoothDeviceSelectActivity extends AppCompatActivity {
                 appDatabase.configurationDao().update(entity);
             }
             return null;
+        }
+    }
+
+
+    @Override
+    public void onUserSelectedDevice(String name, String address, SensorSide side) {
+        if(SensorSide.LEFT.equals(side)) {
+            ConfigurationEntity configurationEntity =
+                    new ConfigurationEntity(Configuration.LEFT_BLUETOOTH_DEVICE_ADDRESS, address);
+
+            InsertDbTask asyncTask = new InsertDbTask();
+            asyncTask.execute(configurationEntity);
+
+            configurationEntity =
+                    new ConfigurationEntity(Configuration.LEFT_BLUETOOTH_DEVICE_NAME, name);
+
+            asyncTask = new InsertDbTask();
+            asyncTask.execute(configurationEntity);
         }
     }
 
