@@ -75,7 +75,11 @@ public class LegsMotionFragment extends Fragment {
 
                 mLeftProgressBar.setProgress(status.getStepProgressLeft());
                 mLeftCounterTextView.setText(Integer.valueOf(status.getCounterLeft()).toString());
-;
+
+                mRightProgressBar.setProgress(status.getStepProgressRight());
+                mRightCounterTextView.setText(Integer.valueOf(status.getCounterRight()).toString());
+
+                ;
             }
         });
     }

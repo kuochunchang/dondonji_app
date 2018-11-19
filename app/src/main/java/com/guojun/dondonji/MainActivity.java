@@ -88,28 +88,40 @@ public class MainActivity extends AppCompatActivity {
         mAppDatabase = Room.databaseBuilder(getApplicationContext(), AppDatabase.class, "app-db").allowMainThreadQueries().build();
         ConfigurationEntity leftAddressConfigurationEntity =
                 mAppDatabase.configurationDao().getConfiguration(Configuration.LEFT_BLUETOOTH_DEVICE_ADDRESS);
-        ConfigurationEntity leftNameConfigurationEntity =
-                mAppDatabase.configurationDao().getConfiguration(Configuration.LEFT_BLUETOOTH_DEVICE_NAME);
+        ConfigurationEntity rightAddressConfigurationEntity =
+                mAppDatabase.configurationDao().getConfiguration(Configuration.RIGHT_BLUETOOTH_DEVICE_ADDRESS);
+//        ConfigurationEntity leftNameConfigurationEntity =
+//                mAppDatabase.configurationDao().getConfiguration(Configuration.LEFT_BLUETOOTH_DEVICE_NAME);
 
 
-        if (leftAddressConfigurationEntity == null) {
-//            deviceName.setText("The bluetooth device has not set up. Please tap the icon at bottom of screen to set up.");
-            FloatingActionButton fab = findViewById(R.id.fab);
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceSelectActivity.class);
-                    startActivity(intent);
-                }
-            });
-            return;
-        }
+//        if (leftAddressConfigurationEntity == null) {
+//            FloatingActionButton fab = findViewById(R.id.fab);
+//            fab.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceSelectActivity.class);
+//                    startActivity(intent);
+//                }
+//            });
+//            return;
+//        }
+//        if (rightAddressConfigurationEntity == null) {
+//            FloatingActionButton fab = findViewById(R.id.fab);
+//            fab.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    Intent intent = new Intent(MainActivity.this, BluetoothDeviceSelectActivity.class);
+//                    startActivity(intent);
+//                }
+//            });
+//            return;
+//        }
 
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.hide();
 
-        if(mLeftMotionSensorService == null) {
+        if (mLeftMotionSensorService == null) {
             mLeftMotionSensorService = new MotionSensorService(new Handler() {
                 @Override
                 public void handleMessage(Message msg) {
@@ -139,6 +151,36 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+        if (mRightMotionSensorService == null) {
+            mRightMotionSensorService = new MotionSensorService(new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    super.handleMessage(msg);
+//                TextView textView = findViewById(R.id.bluetooth_device_status);
+
+                    switch (msg.what) {
+                        case MotionSensorService.Constants.MESSAGE_READ:
+                            SensorData data = (SensorData) msg.obj;
+                            try {
+                                mMotionFragment.setRightSensorData(data);
+                            } catch (Exception e) {
+                                Log.e(TAG, e.getMessage());
+                            }
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONNECTING:
+                            mSensorFragment.setRightSensorStatus(SensorManagementFragment.SensorStatus.CONNECTING);
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONNECTED:
+                            mSensorFragment.setRightSensorStatus(SensorManagementFragment.SensorStatus.CONNECTED);
+                            break;
+                        case MotionSensorService.Constants.MESSAGE_CONN_FAIL:
+                            mSensorFragment.setRightSensorStatus(SensorManagementFragment.SensorStatus.CONNECT_FAIL);
+
+                            break;
+                    }
+                }
+            });
+        }
         if (mMotionFragment == null) {
             FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -157,9 +199,14 @@ public class MainActivity extends AppCompatActivity {
             fragmentTransaction.commit();
         }
 
-        String deviceAddress = leftAddressConfigurationEntity.getValue();
-        mLeftMotionSensorAddress = deviceAddress;
-        mLeftMotionSensorService.connect(mLeftMotionSensorAddress);
+        if (leftAddressConfigurationEntity != null) {
+            mLeftMotionSensorAddress = leftAddressConfigurationEntity.getValue();
+            mLeftMotionSensorService.connect(mLeftMotionSensorAddress);
+        }
+        if (rightAddressConfigurationEntity != null) {
+            mRightMotionSensorAddress = rightAddressConfigurationEntity.getValue();
+            mRightMotionSensorService.connect(mRightMotionSensorAddress);
+        }
 
 
     }
@@ -188,6 +235,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         if (mThisDeviceSupportBluetooth) {
             mLeftMotionSensorService.disconnect();
+            mRightMotionSensorService.disconnect();
             Log.d(TAG, "releaseService(): unbound.");
         }
         super.onDestroy();

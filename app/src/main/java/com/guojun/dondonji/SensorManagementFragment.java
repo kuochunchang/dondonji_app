@@ -53,6 +53,7 @@ public class SensorManagementFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mLeftButton = getActivity().findViewById(R.id.buttonLeft);
         mRightButton = getActivity().findViewById(R.id.buttonRight);
+
         mLeftText = getActivity().findViewById(R.id.textLeft);
         mRightText = getActivity().findViewById(R.id.textRight);
 
@@ -60,10 +61,23 @@ public class SensorManagementFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), BluetoothDeviceSelectActivity.class);
+                Bundle b = new Bundle();
+                b.putString("side", "left");
+                intent.putExtras(b);
                 startActivity(intent);
             }
         });
 
+        mRightButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getActivity(), BluetoothDeviceSelectActivity.class);
+                Bundle b = new Bundle();
+                b.putString("side", "right");
+                intent.putExtras(b);
+                startActivity(intent);
+            }
+        });
 
         setLeftSensorStatus(SensorStatus.NONE);
         setRightSensorStatus(SensorStatus.NONE);
@@ -81,7 +95,7 @@ public class SensorManagementFragment extends Fragment {
         super.onDetach();
     }
 
-    private void updateView() {
+    private void updateLeftView() {
         switch (mLeftSensorStatus) {
             case CONNECTING:
                 mLeftButton.setVisibility(View.INVISIBLE);
@@ -102,14 +116,35 @@ public class SensorManagementFragment extends Fragment {
         }
     }
 
+    private void updateRightView() {
+        switch (mRightSensorStatus) {
+            case CONNECTING:
+                mRightButton.setVisibility(View.INVISIBLE);
+                mRightText.setText("Connecting...");
+                break;
+            case CONNECTED:
+                mRightButton.setText("Setup");
+                mRightButton.setVisibility(View.VISIBLE);
+                mRightText.setTextColor(getResources().getColor(R.color.colorConnected));
+                mRightText.setText("Sensor Connected");
+                break;
+            case CONNECT_FAIL:
+                mRightButton.setText("Setup");
+                mRightButton.setVisibility(View.VISIBLE);
+                mRightText.setText("Sensor Disconnect");
+                mRightText.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+                break;
+        }
+    }
+
     public void setLeftSensorStatus(SensorStatus status) {
         mLeftSensorStatus = status;
-        updateView();
+        updateLeftView();
 
     }
 
     public void setRightSensorStatus(SensorStatus status) {
         mRightSensorStatus = status;
-        updateView();
+        updateRightView();
     }
 }
